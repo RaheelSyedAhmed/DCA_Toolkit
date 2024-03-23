@@ -1,0 +1,95 @@
+#!/bin/bash
+#SBATCH --job-name=hmmsearch_X
+#SBATCH -n 1
+#SBATCH --partition=morcos
+#SBATCH --nodelist=compute-2-04-01
+#SBATCH -e hmmsearch_X.error
+#SBATCH -o hmmsearch_X.out
+
+#This program is meant to read in an HMM Profile file and search it against the UniProtKB database.
+#It returns an AFA file containing a multiple sequence alignment of each hit.  It should be noted
+#that the searching algorithm logs a different entry for each domain match.  This means that if a
+#single protein sequence contains two seperate regions matching the HMM Profile, then there will be
+#two seperate entries for that protein, each one containing one part of the total sequence that
+#contains the matching sequence.
+
+# If a real HMM profile is found, seed sequence is ignored. Otherwise, it is required.
+
+# Supply a name for your HMM profile, regardless of whether you're building it or have one in your file system.
+hmm_prof_fname="X_HMM"
+# Supply a name for your seed sequence. This is optional if you wish to search with an already produced profile HMM.
+seed_seq_fname="X.fasta"
+
+# Choose / comment out a database. uniprot_sprot.fasta is for reviewed UniProt entries only. The other extends to trembl.
+#database="/mfs/io/groups/morcos/g1petastore_transfer/share/databases/uniprot_sprot.fasta"
+database="/mfs/io/groups/morcos/g1petastore_transfer/share/databases/uniprot_sprot_trembl.fasta"
+
+# Supply the number of max continuous gaps.
+max_gaps=10000
+
+# File extensions are added for you. Just put a basename for your output MSAs.
+MSA_fname="X_MSA"
+
+# Remove intermediate .sto and .afa files. This leaves only the fasta file (named __.afa_filtered_____)
+remove_intermediates=true
+
+
+# Check to see if max_gaps is a valid number >= 0.
+reg='(^[1-9]+[0-9]*$)|(^0$)'
+if ! [[ $max_gaps =~ $reg ]] ; then
+        echo -e "\nYou have provided an incorrect number of maximum gaps.\nPlease supply a number >= 0.\nExiting..."
+	exit
+fi
+
+# Make sure user has provided a filename for their MSA outputs.
+if [[ -z "$MSA_fname" ]]; then
+        echo -e "You haven't provided a name for your MSA.\nExiting..."
+        exit
+fi
+
+# Make sure the database is a valid file & present in the file system.
+if ! [[ -f "$database" ]]; then
+	echo -e "Your database file does not exist.\nExiting..."
+	exit
+fi
+
+# Cases:
+#	No HMM profile name provided. This can't work since you either have to
+# 	supply a name for a new HMM profile to be made with or one where it already exists.
+if [[ -z "$hmm_prof_fname" ]]; then
+        echo -e "You must provide a HMM Profile name either to produce one from this script or to reference for HMMSearch.\nExiting..."
+        exit
+fi
+#	Profile name supplied but it's not a file. We must make the profile, but can only do so with a seed sequence file.
+if ! [[ -f "$hmm_prof_fname" ]];  then
+	if [[ -z "$seed_seq_fname" ]]; then
+		echo -e "To construct a HMM profile when none have been supplied, you must input a seed sequence.\nExiting..."
+		exit
+	elif  ! [[ -f "$seed_seq_fname" ]]; then
+		echo -e "Seed sequence provided is not a real file.\nExiting..."
+		exit
+	else
+		echo "Building HMM Profile...\n"
+		/mfs/io/groups/morcos/g1petastore_transfer/share/hmmer/bin/hmmbuild $hmm_prof_fname $seed_seq_fname > /dev/null 2>&1
+		echo "Finished building HMM Profile...\n"
+	fi
+fi
+
+#	The profile exists. We can now do hmmsearch.
+sto_name="$MSA_fname".sto
+afa_name="$MSA_fname".afa
+if [[ -f "$hmm_prof_fname" ]]; then
+	echo -e "Searching databases using hmmsearch...\n"
+	/mfs/io/groups/morcos/g1petastore_transfer/share/hmmer/bin/hmmsearch -A $sto_name $hmm_prof_fname $database > /dev/null 2>&1
+	echo -e "hmmsearch completed.\n"
+	echo -e "Starting conversion to afa format.\n"
+	/mfs/io/groups/morcos/g1petastore_transfer/share/hmmer/bin/esl-reformat -o $afa_name afa $sto_name
+	echo -e "Conversion to afa complete.\n"
+	echo -e "Filtering output with max number of continuous gaps.\n"
+	python3 /mfs/io/groups/morcos/g1petastore_transfer/share/hmmer/filter_pfam_args_updated.py $afa_name $max_gaps
+	echo -e "Done filtering output.\n"
+	if [[ "$remove_intermediates" = true ]]; then
+		rm $sto_name
+		rm $afa_name
+	fi
+fi
