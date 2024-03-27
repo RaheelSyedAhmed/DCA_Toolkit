@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import re
 import argparse
 from header_templates import Entry, Pfam_Header, UniProt_Header, Header
 
