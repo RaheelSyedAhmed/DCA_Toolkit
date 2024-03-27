@@ -50,7 +50,7 @@ class Entry:
     def __init__(self, entry_text, header_type):
         # For parsing header text and sequence text. 
         header_text = entry_text.split("\n")[0]
-        sequence = "\n".join(entry_text.split("\n")[1:])
+        sequence = entry_text.split("\n")[1]
         self.header = header_type(header_text)
         self.sequence = sequence
 
