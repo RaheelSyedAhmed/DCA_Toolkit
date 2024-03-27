@@ -62,7 +62,7 @@ def concatenate_all_domains(concat_dicts, curr_concat, key_attr, writer):
     # write out the concatenated sequence and the header.
     if len(concat_dicts) == 1:
         for seq in concat_dicts[0][key_attr]:
-            writer.write(ID + "\n")
+            writer.write(key_attr + "\n")
             writer.write(curr_concat + seq + "\n")
     else:
         for seq in concat_dicts[0][key_attr]:
