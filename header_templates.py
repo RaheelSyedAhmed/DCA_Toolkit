@@ -16,7 +16,7 @@ class UniProt_Header(Header):
         post_ID = header_text.split("|")[2].split("OS=")
         self.entry_name, self.protein_name = re.search(r"(\S+)(?:\s(.+))?", post_ID[0]).groups()
         # This finds the subsection of an entry name (e.g. P0C7P0_PANTR -> PANTR, where PANTR is Pan Troglodytes)
-        self.alt_species = re.search(r"_(\w{5})", self.entry_name).group(1)
+        self.alt_species = re.search(r"_(\w+)", self.entry_name).group(1)
         # Ensures secondary options are available. Inactive entries only have db, ID, and entry name.
         if len(post_ID) > 1:
             # Finds OS, a taxonomic identifier
