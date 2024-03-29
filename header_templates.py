@@ -8,7 +8,7 @@ class UniProt_Header(Header):
     def __init__(self, header_text):
         super().__init__(header_text)
         # Finds UniProt Database (either Swiss-Prot/sp or TrEMBL/tr)
-        self.db = re.search(r">(sp|tr)", self.text).group(1)
+        self.db = re.search(r">(in|sp|tr)", self.text).group(1)
         # UniProt ID regex from their website (slightly modified)
         self.ID = re.search(r"([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9][A-Z][A-Z,0-9][A-Z,0-9][0-9]([A-Z][A-Z,0-9][A-Z,0-9][0-9]){0,1})", self.text).group(0)
         # Finds entry name and protein name right after the ID. 
@@ -48,5 +48,5 @@ class Entry:
         # For parsing header text and sequence text. 
         header_text = entry_text.split("\n")[0]
         sequence = entry_text.split("\n")[1]
-        self.header = header_type(header_text)
-        self.sequence = sequence
+        self.header = header_type(header_text.strip())
+        self.sequence = sequence.strip()
