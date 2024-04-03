@@ -48,7 +48,7 @@ for filename in args.input_files:
         # Get the current sequences associated with that header
         seq_list_of_ID = domain_dict.get(entry.header.ID, [])
         # Add our new found sequence to it.
-        seq_list_of_ID.append(entry.sequence.strip())
+        seq_list_of_ID.append(entry.sequence)
         # Update the dictionary accordingly
         domain_dict[entry.header.ID] = seq_list_of_ID
     # After finishing a file, add it to the list that tracks all domain_dicts
