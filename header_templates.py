@@ -21,11 +21,11 @@ class UniProt_Header(Header):
         # Ensures secondary options are available. Inactive entries only have db, ID, and entry name.
         if len(post_ID) > 1:
             # Finds OS, a taxonomic identifier
-            self.OS = re.search(r"OS=\S+\s", header_text).group(0).strip()
+            self.OS = re.search(r"(OS=[\w\s]+)OX=", header_text).group(1).strip()
             # Finds OX, a taxonomic identifier
             self.OX = re.search(r"OX=\d+\s", header_text).group(0).strip()
             # Search for gene name. If it exists, we can add it as an attribute
-            GN_search = re.search(r"GN=\S+\s", header_text)
+            GN_search = re.search(r"GN=[\w\s]+)PE=", header_text)
             if GN_search:
                 self.GN = GN_search.group(0).strip()
             else:
