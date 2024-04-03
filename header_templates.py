@@ -13,8 +13,9 @@ class UniProt_Header(Header):
         self.ID = re.search(r"([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9][A-Z][A-Z,0-9][A-Z,0-9][0-9]([A-Z][A-Z,0-9][A-Z,0-9][0-9]){0,1})", self.text).group(0)
         # Finds entry name and protein name right after the ID. 
         # Entry name may also encode a five character species name after an underscore
-        post_ID = header_text.split("|")[2].split("OS=")
+        post_ID = header_text.split("OS=")
         self.entry_name, self.protein_name = re.search(r"(\S+)(?:\s(.+))?", post_ID[0]).groups()
+        self.entry_name = self.entry_name.split("|")[-1]
         # This finds the subsection of an entry name (e.g. P0C7P0_PANTR -> PANTR, where PANTR is Pan Troglodytes)
         self.alt_species = re.search(r"_(\w+)", self.entry_name).group(1)
         # Ensures secondary options are available. Inactive entries only have db, ID, and entry name.
