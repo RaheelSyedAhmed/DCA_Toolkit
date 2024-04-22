@@ -40,8 +40,11 @@ class Pfam_Header(Header):
     def __init__(self, header_text):
         super().__init__(header_text)
         # For headers directly off of Pfam's alignment page. 
-        # It has the format ACCESSION_CODE
-        self.ID, self.res_range = self.text.split("/")
+        # It has the format AcessionCode.digit/xx-xx
+        slash_split_header = self.text.split("/")
+        self.ID = slash_split_header[0]
+        if len(slash_split_header) > 1:
+            self.res_range = slash_split_header[1]
         self.ID = re.sub(r"\.\d", "", self.ID)
 
 class Entry:
