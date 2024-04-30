@@ -15,7 +15,6 @@ with open(MSA_fname, 'r') as MSA_fs:
 seqs = data[1::2]
 
 for seq in seqs:
-    
     dash_match = re.findall(r"-+", seq)
     gap_counts = [len(x) for x in dash_match]
     if len(gap_counts) > 0:
