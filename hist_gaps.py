@@ -25,7 +25,6 @@ for seq in seqs:
         count_dict[0] = count_dict.get(0, 0) + 1
 
 sorted_count_dict = sorted(count_dict.items())
-print(sorted_count_dict)
 cumul_count = []
 curr_count = 0
 for key, value in sorted_count_dict:
